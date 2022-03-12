@@ -1,36 +1,54 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.6.0 <=0.8.4;
+pragma solidity >=0.8.0 <0.9.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "hardhat/console.sol";
+import "./BoledoHelper.sol";
 
-contract Bolido is Ownable {
+contract Bolido is Ownable, BoledoHelper {
+    uint public nextDrawTime;
+    uint private durationBetweenDraws = 12 hours;
+    address public operator;
+    Session[] public sessions;
 
-    uint32 public epochLength;
-    uint32 public nextEpochTime;
-    
-    address operator;
+    struct Session {
+        uint8[2]winningNumbers;
+        bool hasPlayed;
+        address[] winners;
+        uint poolSize;
+    }
 
-    constructor(address _operator, uint32 _epochLength) public {
+    struct Ticket {
+        uint sessionId;
+        address purchaser;
+        uint8[2] numbers;
+        uint amount;
+    }
+
+    mapping(uint => Ticket[]) public sessionPurchases;
+
+    constructor(address _operator) public {
         operator = _operator;
-        epochLength = _epochLength;
+        nextDraw = block.timestamp + durationBetweenDraws;
+        sessions.push(Session([],false,[],0)); 
     }
 
-    function random() private view returns(uint){
-         return uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp)));
-    }
+    // TODO: allow users to bet on a number x amount of times (a positive integer);
 
-    function pickTwoRandomNumbers() internal returns(uint[2] memory) {
-        uint _numberOne = random() % 9;
-        uint _numberTwo = random() % 9;
 
-        uint[2] memory _numbers = [_numberOne, _numberTwo];
-        return _numbers;
-    }
+    function draw() external isOperator {
+        require(block.timestamp >= nextDrawTime, "Not time yet to draw");
+        Session storage currentSession = sessions[sessions.length - 1];
+        uint[2] memory winningNumbers = pickTwoRandomNumbers();
+        // TODO: find winning tickets;
 
-    function draw() public isOperator returns(uint[2] memory) {
-        uint[2] memory _winningNumbers = pickTwoRandomNumbers();
-        return _winningNumbers;
+        // TODO: calculate winning amount for each winning ticket from the pool
+
+        // TODO: update session
+
+        // TODO: create new session
+
+        // TODO: update the nextDrawTime
     }
 
     modifier isOperator() {
