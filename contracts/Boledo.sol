@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "hardhat/console.sol";
 import "./BoledoHelper.sol";
 
-contract Bolido is Ownable, BoledoHelper {
+contract Boledo is Ownable, BoledoHelper {
     uint public nextDrawTime;
     uint private durationBetweenDraws = 12 hours;
     address public operator;
